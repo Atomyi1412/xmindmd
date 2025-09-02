@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>主题配色预览 | XMind ⇄ Markdown</title>
+  <style>
+    :root {
+      --radius: 14px;
+      --shadow-sm: 0 4px 12px rgba(0,0,0,.08);
+      --shadow-md: 0 10px 30px rgba(0,0,0,.12);
+      --shadow-lg: 0 18px 50px rgba(0,0,0,.16);
+      --font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
+    /* Theme variables (default acts as fallback) */
+    body {
+      --bg: #0f172a;
+      --bg-elev: #111827cc;
+      --panel: #111827;
+      --panel-2: #0b1220;
+      --border: #2a3346;
+      --text: #e5e7eb;
+      --muted: #9aa3b2;
+      --primary: #22c55e;
+      --primary-contrast: #062410;
+      --accent: #38bdf8;
+      --accent-contrast: #06212b;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+
+      background: linear-gradient(160deg, var(--panel-2), var(--panel));
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px 40px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      background: linear-gradient(180deg, color-mix(in oklab, var(--panel), #ffffff 4%), var(--panel));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 16px;
+      backdrop-filter: blur(10px);
+      z-index: 2;
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+    .brand .dot {
+      width: 12px; height: 12px; border-radius: 50%; background: var(--accent);
+      box-shadow: 0 0 0 6px color-mix(in oklab, var(--accent), transparent 75%);
+    }
+
+    .themes-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 20px;
+    }
+
+    .theme-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      background: linear-gradient(180deg, color-mix(in oklab, var(--panel), #ffffff 6%), var(--panel));
+      box-shadow: var(--shadow-sm);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      cursor: pointer; position: relative;
+    }
+    .theme-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: color-mix(in oklab, var(--accent), var(--border) 50%); }
+    .theme-card.active { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .swatches { display:flex; gap:8px; padding: 14px; border-bottom: 1px dashed var(--border); }
+    .swatch { width: 26px; height: 26px; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+
+    .card-body { padding: 14px; display:flex; flex-direction:column; gap:12px; }
+
+    .tag { display:inline-flex; align-items:center; gap:8px; font-size:12px; color: var(--muted); }
+    .tag .chip { width:10px; height:10px; border-radius:50%; background: var(--primary); box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary), transparent 75%); }
+
+    .preview {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 22px;
+    }
+    .panel {
+      padding: 16px; border-radius: 14px; border: 1px solid var(--border); background: color-mix(in oklab, var(--panel), #ffffff 4%);
+    }
+    .panel h3 { margin: 0 0 12px; font-size: 15px; color: var(--muted); font-weight: 600; }
+
+    /* 新增：主界面SVG预览样式 */
+    .ui-preview { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: color-mix(in oklab, var(--panel), #ffffff 3%); }
+    .ui-preview svg { width: 100%; height: auto; display: block; }
+    .svg-label { font: 600 13px var(--font); fill: var(--text); }
+    .svg-small { font: 12px var(--font); fill: var(--muted); }
+
+    .btns { display:flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      border-radius: 12px; padding: 10px 14px; border: 1px solid transparent; font-weight: 600; letter-spacing: .2px;
+      cursor: pointer; transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--primary); color: var(--primary-contrast); box-shadow: 0 6px 16px color-mix(in oklab, var(--primary), transparent 76%); }
+    .btn-primary:hover { filter: brightness(1.02); }
+    .btn-secondary { background: color-mix(in oklab, var(--accent), #000 78%); color: #e6f5ff; border: 1px solid color-mix(in oklab, var(--accent), #000 60%); }
+    .btn-ghost { background: transparent; color: var(--text); border: 1px dashed var(--border); }
+
+    .input, .select { width: 100%; padding: 10px 12px; border-radius: 12px; background: color-mix(in oklab, var(--panel), #ffffff 3%); border: 1px solid var(--border); color: var(--text); }
+    .help { color: var(--muted); font-size: 12px; margin-top: 8px; }
+
+    .footer { margin-top: 26px; display:flex; align-items:center; gap:10px; color: var(--muted); }
+
+    /* THEME DEFINITIONS */
+    /* 1. Emerald Mint */
+    [data-theme="emerald-mint"]{
+      --bg:#071a14; --panel:#0b241b; --panel-2:#061912; --border:#123528; --text:#ecfdf5; --muted:#a7f3d0;
+      --primary:#22c55e; --primary-contrast:#072413; --accent:#2dd4bf; --accent-contrast:#072321;
+    }
+    /* 2. Sapphire Sky */
+    [data-theme="sapphire-sky"]{
+      --bg:#071120; --panel:#0b1530; --panel-2:#060d1f; --border:#1b2950; --text:#e6eefc; --muted:#a3b7e6;
+      --primary:#60a5fa; --primary-contrast:#0a1d3d; --accent:#22d3ee; --accent-contrast:#062126;
+    }
+    /* 3. Plum Blossom */
+    [data-theme="plum-blossom"]{
+      --bg:#1a0e1b; --panel:#22102a; --panel-2:#170a1f; --border:#3a214a; --text:#fde7ff; --muted:#e7b9ef;
+      --primary:#d946ef; --primary-contrast:#3a073d; --accent:#a78bfa; --accent-contrast:#1b1636;
+    }
+    /* 4. Sunset Coral */
+    [data-theme="sunset-coral"]{
+      --bg:#170d0b; --panel:#241210; --panel-2:#130908; --border:#3a1c18; --text:#fff0ec; --muted:#fec7b9;
+      --primary:#fb7185; --primary-contrast:#3c0b13; --accent:#f59e0b; --accent-contrast:#2b1601;
+    }
+    /* 5. Forest Night */
+    [data-theme="forest-night"]{
+      --bg:#08110e; --panel:#0c1713; --panel-2:#06100c; --border:#12291f; --text:#eaf7f1; --muted:#b7e4cf;
+      --primary:#34d399; --primary-contrast:#06281c; --accent:#93c5fd; --accent-contrast:#0b1d34;
+    }
+    /* 6. Slate Minimal */
+    [data-theme="slate-minimal"]{
+      --bg:#0b0f14; --panel:#0e141b; --panel-2:#0a0f15; --border:#1e293b; --text:#e5e7eb; --muted:#9aa3b2;
+      --primary:#94a3b8; --primary-contrast:#0b0f14; --accent:#22c55e; --accent-contrast:#062410;
+    }
+    /* 新增更明亮的主题 */
+    /* 7. Snow Quartz */
+    [data-theme="snow-quartz"]{
+      --bg:#f8fafc; --panel:#ffffff; --panel-2:#f1f5f9; --border:#e2e8f0; --text:#0f172a; --muted:#64748b;
+      --primary:#2563eb; --primary-contrast:#ffffff; --accent:#06b6d4; --accent-contrast:#ffffff;
+    }
+    /* 8. Dawn Peach */
+    [data-theme="dawn-peach"]{
+      --bg:#fff7ed; --panel:#fffaf5; --panel-2:#ffedd5; --border:#fed7aa; --text:#3f1d0b; --muted:#a16207;
+      --primary:#fb923c; --primary-contrast:#ffffff; --accent:#f97316; --accent-contrast:#ffffff;
+    }
+    /* 9. Mint Latte */
+    [data-theme="mint-latte"]{
+      --bg:#f0fdf4; --panel:#ffffff; --panel-2:#ecfdf5; --border:#d1fae5; --text:#064e3b; --muted:#0f766e;
+      --primary:#10b981; --primary-contrast:#ffffff; --accent:#14b8a6; --accent-contrast:#ffffff;
+    }
+    /* 10. Sky Glass */
+    [data-theme="sky-glass"]{
+      --bg:#eff6ff; --panel:#ffffff; --panel-2:#e0f2fe; --border:#cbd5e1; --text:#0f172a; --muted:#64748b;
+      --primary:#3b82f6; --primary-contrast:#ffffff; --accent:#22d3ee; --accent-contrast:#ffffff;
+    }
+    /* 11. Lavender Mist */
+    [data-theme="lavender-mist"]{
+      --bg:#faf5ff; --panel:#ffffff; --panel-2:#f3e8ff; --border:#e9d5ff; --text:#3b0764; --muted:#6b7280;
+      --primary:#a78bfa; --primary-contrast:#ffffff; --accent:#d946ef; --accent-contrast:#ffffff;
+    }
+    /* 12. Paper Minimal */
+    [data-theme="paper-minimal"]{
+      --bg:#f8fafc; --panel:#ffffff; --panel-2:#f1f5f9; --border:#e5e7eb; --text:#0f172a; --muted:#64748b;
+      --primary:#0ea5e9; --primary-contrast:#ffffff; --accent:#22c55e; --accent-contrast:#ffffff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand"><span class="dot"></span>主题配色预览</div>
+      <div class="themes-bar">
+        <select id="themeSelect" class="select select-theme" aria-label="选择主题">
+          <option value="emerald-mint">Emerald Mint（绿松深夜）</option>
+          <option value="sapphire-sky">Sapphire Sky（蓝宝天穹）</option>
+          <option value="plum-blossom">Plum Blossom（紫藤花）</option>
+          <option value="sunset-coral">Sunset Coral（珊瑚暮光）</option>
+          <option value="forest-night">Forest Night（林深夜语）</option>
+          <option value="slate-minimal">Slate Minimal（板岩极简）</option>
+          <option value="snow-quartz">Snow Quartz（雪晶白）</option>
+          <option value="dawn-peach">Dawn Peach（拂晓蜜桃）</option>
+          <option value="mint-latte">Mint Latte（薄荷拿铁）</option>
+          <option value="sky-glass">Sky Glass（天光玻璃）</option>
+          <option value="lavender-mist">Lavender Mist（薰衣薄雾）</option>
+          <option value="paper-minimal">Paper Minimal（纸感极简）</option>
+        </select>
+        <button id="copyBtn" class="btn btn-ghost" title="复制当前主题 CSS 变量">复制变量</button>
+      </div>
+    </div>
+
+    <div class="themes-grid" id="grid">
+      <!-- The theme cards will be injected by JS -->
+    </div>
+
+    <div class="preview" style="margin-top:26px">
+      <div class="panel">
+        <h3>主界面配色预览</h3>
+        <div class="ui-preview">
+          <svg viewBox="0 0 740 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="主界面配色预览">
+            <defs>
+              <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" style="stop-color: var(--primary)"/>
+                <stop offset="100%" style="stop-color: var(--accent)"/>
+              </linearGradient>
+            </defs>
+            <!-- 整体面板背景 -->
+            <rect x="10" y="10" width="720" height="400" rx="16" fill="var(--panel)" stroke="var(--border)"/>
+            <!-- 顶部标题区（渐变） -->
+            <rect x="10" y="10" width="720" height="88" rx="16" fill="url(#hdr)"/>
+            <text x="30" y="58" style="font: 700 18px var(--font); fill: var(--primary-contrast);">🔄 双向转换器</text>
+            <text x="30" y="78" class="svg-small" style="fill: color-mix(in oklab, var(--primary-contrast), #000 10%);">XMind ⇄ Markdown 互相转换</text>
+
+            <!-- 方向选择三卡 -->
+            <rect x="30" y="120" width="210" height="68" rx="12" fill="color-mix(in oklab, var(--panel), #fff 6%)" stroke="var(--accent)" stroke-width="2"/>
+            <text x="46" y="150" class="svg-label">🧠→📝 XMind → Markdown</text>
+
+            <rect x="260" y="120" width="210" height="68" rx="12" fill="color-mix(in oklab, var(--panel), #fff 4%)" stroke="var(--border)"/>
+            <text x="276" y="150" class="svg-label">📝→🧠 Markdown → XMind</text>
+
+            <rect x="490" y="120" width="210" height="68" rx="12" fill="color-mix(in oklab, var(--panel), #fff 4%)" stroke="var(--border)"/>
+            <text x="506" y="150" class="svg-label">📝→📝 增加二级</text>
+
+            <!-- 上传区域（虚线框） -->
+            <rect x="30" y="208" width="670" height="100" rx="12" fill="transparent" stroke="var(--border)" stroke-dasharray="10 7"/>
+            <text x="70" y="258" class="svg-label">📁 点击选择或拖拽文件</text>
+            <text x="70" y="276" class="svg-small">支持 .xmind / .md，最大 16MB</text>
+
+            <!-- 结果区域与下载按钮 -->
+            <rect x="30" y="320" width="480" height="72" rx="10" fill="white" fill-opacity="0.9" stroke="var(--border)"/>
+            <!-- 模拟文本行 -->
+            <rect x="46" y="340" width="210" height="10" rx="5" fill="color-mix(in oklab, var(--panel), #000 6%)"/>
+            <rect x="46" y="356" width="260" height="10" rx="5" fill="color-mix(in oklab, var(--panel), #000 6%)"/>
+            <rect x="46" y="372" width="180" height="10" rx="5" fill="color-mix(in oklab, var(--panel), #000 6%)"/>
+
+            <rect x="600" y="332" width="100" height="40" rx="9" fill="var(--primary)"/>
+            <text x="650" y="358" text-anchor="middle" style="font: 600 13px var(--font); fill: var(--primary-contrast);">下载结果</text>
+          </svg>
+        </div>
+        <div class="help">此为示意预览，用于快速观察不同主题下主界面的大致配色氛围。</div>
+      </div>
+
+      <div class="panel">
+        <h3>按钮与状态</h3>
+        <div class="btns">
+          <button class="btn btn-primary">Primary 主按钮</button>
+          <button class="btn btn-secondary">Secondary 次按钮</button>
+          <button class="btn btn-ghost">Ghost 幽灵按钮</button>
+        </div>
+        <div class="help">亮色对比与阴影强度受主题变量影响。</div>
+      </div>
+      <div class="panel">
+        <h3>输入与控件</h3>
+        <div style="display:grid; gap:10px; grid-template-columns: 1fr 1fr;">
+          <input class="input" placeholder="示例输入框" />
+          <select class="select"><option>下拉选择</option><option>选项A</option><option>选项B</option></select>
+        </div>
+        <div class="help">边框与面板颜色来自 --border 与 --panel 变量。</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      提示：点击上面的主题卡片或使用右上角下拉框切换主题；点击“复制变量”可复制当前主题的 CSS 变量，便于移植到 index.html。
+    </div>
+  </div>
+
+<script>
+  const THEMES = [
+    { id:'emerald-mint', name:'Emerald Mint（绿松深夜）', colors:{bg:'#071a14', panel:'#0b241b', text:'#ecfdf5', primary:'#22c55e', accent:'#2dd4bf'} },
+    { id:'sapphire-sky', name:'Sapphire Sky（蓝宝天穹）', colors:{bg:'#071120', panel:'#0b1530', text:'#e6eefc', primary:'#60a5fa', accent:'#22d3ee'} },
+    { id:'plum-blossom', name:'Plum Blossom（紫藤花）', colors:{bg:'#1a0e1b', panel:'#22102a', text:'#fde7ff', primary:'#d946ef', accent:'#a78bfa'} },
+    { id:'sunset-coral', name:'Sunset Coral（珊瑚暮光）', colors:{bg:'#170d0b', panel:'#241210', text:'#fff0ec', primary:'#fb7185', accent:'#f59e0b'} },
+    { id:'forest-night', name:'Forest Night（林深夜语）', colors:{bg:'#08110e', panel:'#0c1713', text:'#eaf7f1', primary:'#34d399', accent:'#93c5fd'} },
+    { id:'slate-minimal', name:'Slate Minimal（板岩极简）', colors:{bg:'#0b0f14', panel:'#0e141b', text:'#e5e7eb', primary:'#94a3b8', accent:'#22c55e'} },
+    // 新增更明亮主题
+    { id:'snow-quartz', name:'Snow Quartz（雪晶白）', colors:{bg:'#f8fafc', panel:'#ffffff', text:'#0f172a', primary:'#2563eb', accent:'#06b6d4'} },
+    { id:'dawn-peach', name:'Dawn Peach（拂晓蜜桃）', colors:{bg:'#fff7ed', panel:'#fffaf5', text:'#3f1d0b', primary:'#fb923c', accent:'#f97316'} },
+    { id:'mint-latte', name:'Mint Latte（薄荷拿铁）', colors:{bg:'#f0fdf4', panel:'#ffffff', text:'#064e3b', primary:'#10b981', accent:'#14b8a6'} },
+    { id:'sky-glass', name:'Sky Glass（天光玻璃）', colors:{bg:'#eff6ff', panel:'#ffffff', text:'#0f172a', primary:'#3b82f6', accent:'#22d3ee'} },
+    { id:'lavender-mist', name:'Lavender Mist（薰衣薄雾）', colors:{bg:'#faf5ff', panel:'#ffffff', text:'#3b0764', primary:'#a78bfa', accent:'#d946ef'} },
+    { id:'paper-minimal', name:'Paper Minimal（纸感极简）', colors:{bg:'#f8fafc', panel:'#ffffff', text:'#0f172a', primary:'#0ea5e9', accent:'#22c55e'} },
+  ];
+
+  const grid = document.getElementById('grid');
+  const select = document.getElementById('themeSelect');
+  const copyBtn = document.getElementById('copyBtn');
+
+  function makeCard(theme){
+    const card = document.createElement('div');
+    card.className = 'theme-card';
+    card.dataset.theme = theme.id;
+
+    const top = document.createElement('div');
+    top.className = 'swatches';
+
+    const s1 = document.createElement('div'); s1.className = 'swatch'; s1.style.background = theme.colors.primary;
+    const s2 = document.createElement('div'); s2.className = 'swatch'; s2.style.background = theme.colors.accent;
+    const s3 = document.createElement('div'); s3.className = 'swatch'; s3.style.background = theme.colors.panel;
+    const s4 = document.createElement('div'); s4.className = 'swatch'; s4.style.background = theme.colors.bg;
+    const s5 = document.createElement('div'); s5.className = 'swatch'; s5.style.background = theme.colors.text; s5.style.boxShadow = 'inset 0 0 0 1px rgba(255,255,255,.15)';
+
+    top.append(s1,s2,s3,s4,s5);
+
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    const name = document.createElement('div'); name.textContent = theme.name;
+    const tag = document.createElement('div'); tag.className='tag'; tag.innerHTML = '<span class="chip"></span>点击套用';
+    body.append(name, tag);
+
+    card.append(top, body);
+
+    card.addEventListener('click', () => applyTheme(theme.id));
+    return card;
+  }
+
+  function applyTheme(id){
+    document.body.setAttribute('data-theme', id);
+    select.value = id;
+    // 激活卡片态
+    document.querySelectorAll('.theme-card').forEach(c => c.classList.toggle('active', c.dataset.theme === id));
+  }
+
+  function cssVariablesForCurrent(){
+    const styles = getComputedStyle(document.body);
+    const keys = ['--bg','--bg-elev','--panel','--panel-2','--border','--text','--muted','--primary','--primary-contrast','--accent','--accent-contrast'];
+    const lines = keys.map(k => `  ${k}: ${styles.getPropertyValue(k).trim()};`).join('\n');
+    return `:root {\n${lines}\n}`;
+  }
+
+  select.addEventListener('change', e => applyTheme(e.target.value));
+  copyBtn.addEventListener('click', async () => {
+    const css = cssVariablesForCurrent();
+    try { await navigator.clipboard.writeText(css); copyBtn.textContent = '已复制'; setTimeout(()=>copyBtn.textContent='复制变量', 1400); }
+    catch{ alert(css); }
+  });
+
+  // init
+  THEMES.forEach(t => grid.appendChild(makeCard(t)));
+  applyTheme(select.value);
+</script>
+</body>
+</html>

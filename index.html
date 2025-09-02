@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔄 双向转换器 v1.0.0 - XMind ⇄ Markdown</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f8fafc;
+            --bg-elev: #111827cc;
+            --panel: #ffffff;
+            --panel-2: #f1f5f9;
+            --border: #e5e7eb;
+            --text: #0f172a;
+            --muted: #64748b;
+            --primary: #0ea5e9;
+            --primary-contrast: #ffffff;
+            --accent: #22c55e;
+            --accent-contrast: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(160deg, var(--panel-2), var(--panel));
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: var(--primary-contrast);
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .conversion-direction {
+            margin-bottom: 30px;
+        }
+
+        .format-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .format-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .format-option {
+            flex: 1;
+            min-width: 200px;
+            padding: 20px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            background: color-mix(in oklab, var(--panel), #000 2%);
+        }
+
+        .format-option:hover {
+            border-color: var(--primary);
+            background: color-mix(in oklab, var(--panel), var(--primary) 6%);
+            transform: translateY(-2px);
+        }
+
+        .format-option.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: var(--primary-contrast);
+        }
+
+        .format-option input {
+            display: none;
+        }
+
+        .format-option div {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+
+        .format-option small {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .upload-area {
+            border: 3px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary);
+            background: color-mix(in oklab, var(--panel), var(--primary) 6%);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: var(--muted);
+        }
+
+        .upload-text {
+            font-size: 1.2em;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .upload-hint {
+            color: var(--muted);
+            font-size: 0.9em;
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .file-info h4 {
+            color: var(--text);
+            margin-bottom: 5px;
+        }
+
+        .file-info p {
+            color: var(--muted);
+            font-size: 0.9em;
+        }
+
+        .convert-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: var(--primary-contrast);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+        }
+
+        .convert-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px color-mix(in oklab, var(--primary), transparent 70%);
+        }
+
+        .convert-btn:disabled {
+            background: #ccd6dd;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-area {
+            background: color-mix(in oklab, var(--panel), #000 3%);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .result-content {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            margin-bottom: 15px;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: var(--primary-contrast);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px color-mix(in oklab, var(--primary), transparent 70%);
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border: 1px solid #c3e6cb;
+        }
+
+        @media (max-width: 768px) {
+            .format-options {
+                flex-direction: column;
+            }
+            
+            .format-option {
+                min-width: auto;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 双向转换器 v1.0.0</h1>
+            <p>XMind ⇄ Markdown 互相转换</p>
+        </div>
+
+        <form id="convertForm" enctype="multipart/form-data" class="form-container">
+            <div class="conversion-direction">
+                <div class="format-title">选择转换方向</div>
+                <div class="format-options">
+                    <label class="format-option selected" for="directionXmindToMd">
+                        <input type="radio" id="directionXmindToMd" name="direction" value="xmind_to_md" checked>
+                        <div>🧠➡️📝</div>
+                        <small>XMind → Markdown</small>
+                    </label>
+                    <label class="format-option" for="directionMdToXmind">
+                        <input type="radio" id="directionMdToXmind" name="direction" value="md_to_xmind">
+                        <div>📝➡️🧠</div>
+                        <small>Markdown → XMind</small>
+                    </label>
+                    <label class="format-option" for="directionMdToMd">
+                        <input type="radio" id="directionMdToMd" name="direction" value="md_to_md">
+                        <div>📝➡️📝</div>
+                        <small>Markdown → Markdown（增加二级）</small>
+                    </label>
+                </div>
+            </div>
+
+            <div class="conversion-direction" id="formatSelection">
+                <div class="format-title">选择输出格式</div>
+                <div class="format-options">
+                    <label class="format-option selected" for="formatHeader">
+                        <input type="radio" id="formatHeader" name="format" value="header" checked>
+                        <div>📋</div>
+                        <small>标题格式</small>
+                    </label>
+                    <label class="format-option" for="formatList">
+                        <input type="radio" id="formatList" name="format" value="list">
+                        <div>📝</div>
+                        <small>列表格式</small>
+                    </label>
+                </div>
+            </div>
+
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text" id="uploadText">点击选择或拖拽 XMind 文件</div>
+                <div class="upload-hint" id="uploadHint">支持 .xmind 格式，最大 16MB</div>
+                <input type="file" id="fileInput" name="file" accept=".xmind" class="file-input">
+            </div>
+
+            <div class="file-info" id="fileInfo">
+                <h4>已选择文件</h4>
+                <p id="fileName"></p>
+                <p id="fileSize"></p>
+            </div>
+
+            <button type="submit" class="convert-btn" id="convertBtn" disabled>开始转换</button>
+
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>正在转换中，请稍候...</p>
+            </div>
+
+            <div class="result-area" id="resultArea">
+                <div class="result-content" id="resultContent"></div>
+                <button type="button" class="download-btn" id="downloadBtn">下载结果</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const convertForm = document.getElementById('convertForm');
+            const fileInput = document.getElementById('fileInput');
+            const uploadArea = document.getElementById('uploadArea');
+            const uploadText = document.getElementById('uploadText');
+            const uploadHint = document.getElementById('uploadHint');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            const convertBtn = document.getElementById('convertBtn');
+            const loading = document.getElementById('loading');
+            const resultArea = document.getElementById('resultArea');
+            const resultContent = document.getElementById('resultContent');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const formatSelection = document.getElementById('formatSelection');
+            
+            // 获取所有方向选项
+            const directionOptions = document.querySelectorAll('input[name="direction"]');
+            const directionLabels = document.querySelectorAll('label[for^="direction"]');
+            
+            // 获取所有格式选项
+            const formatOptions = document.querySelectorAll('label[for^="format"]');
+            
+            let selectedFile = null;
+            let convertedContent = null;
+            let convertedFilename = null;
+            // 下载前默认禁用，待转换成功后启用
+            
+            // 文件选择事件
+            fileInput.addEventListener('change', handleFileSelect);
+            uploadArea.addEventListener('click', (e) => {
+                // 防止重复触发文件选择
+                if (e.target === fileInput) return;
+                fileInput.click();
+            });
+
+            // 拖拽事件
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
+
+            // 转换方向选择事件
+            directionOptions.forEach(option => {
+                option.addEventListener('change', updateUIForDirection);
+                option.addEventListener('input', updateUIForDirection);
+            });
+            
+            // 方向按钮点击时，仅在方向分组内切换选中样式并更新UI
+            directionLabels.forEach(label => {
+                label.addEventListener('click', () => {
+                    directionLabels.forEach(l => l.classList.remove('selected'));
+                    label.classList.add('selected');
+                    const input = label.querySelector('input[name="direction"]');
+                    if (input) {
+                        input.checked = true;
+                        updateUIForDirection();
+                    }
+                });
+            });
+            
+            // 格式选择事件
+            formatOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    formatOptions.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    const input = option.querySelector('input[name="format"]');
+                    if (input) input.checked = true;
+                });
+            });
+
+            // 表单提交事件
+            convertForm.addEventListener('submit', handleConvert);
+
+            // 下载按钮事件
+            downloadBtn.addEventListener('click', handleDownload);
+
+            function handleFileSelect(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    handleFile(file);
+                }
+            }
+
+            function updateUIForDirection() {
+                const direction = document.querySelector('input[name="direction"]:checked').value;
+                if (direction === 'xmind_to_md') {
+                    uploadText.textContent = '点击选择或拖拽 XMind 文件';
+                    uploadHint.textContent = '支持 .xmind 格式，最大 16MB';
+                    fileInput.accept = '.xmind';
+                    formatSelection.style.display = 'block';
+                } else {
+                    uploadText.textContent = '点击选择或拖拽 Markdown 文件';
+                    uploadHint.textContent = '支持 .md 格式，最大 16MB';
+                    fileInput.accept = '.md';
+                    formatSelection.style.display = (direction === 'xmind_to_md') ? 'block' : 'none';
+                }
+                // 清理选择状态
+                selectedFile = null;
+                fileInput.value = '';
+                fileInfo.style.display = 'none';
+                convertBtn.disabled = true;
+                // 清理转换结果与下载状态
+                convertedContent = null;
+                convertedFilename = null;
+                resultContent.textContent = '';
+                resultArea.style.display = 'none';
+                downloadBtn.disabled = true;
+                hideMessages();
+            }
+
+            function handleFile(file) {
+                const direction = document.querySelector('input[name="direction"]:checked').value;
+                
+                if (direction === 'xmind_to_md') {
+                    if (!file.name.toLowerCase().endsWith('.xmind')) {
+                        showError('请选择 .xmind 格式的文件');
+                        return;
+                    }
+                } else {
+                    if (!file.name.toLowerCase().endsWith('.md')) {
+                        showError('请选择 .md 格式的文件');
+                        return;
+                    }
+                }
+
+                if (file.size > 16 * 1024 * 1024) {
+                    showError('文件大小不能超过 16MB');
+                    return;
+                }
+
+                selectedFile = file;
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                fileInfo.style.display = 'block';
+                convertBtn.disabled = false;
+                hideMessages();
+            }
+
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            async function handleConvert(e) {
+                e.preventDefault();
+
+                if (!selectedFile) {
+                    showError('请先选择文件');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                formData.append('direction', document.querySelector('input[name="direction"]:checked').value);
+                
+                const direction = document.querySelector('input[name="direction"]:checked').value;
+                if (direction === 'xmind_to_md') {
+                    formData.append('format', document.querySelector('input[name="format"]:checked').value);
+                }
+
+                convertBtn.disabled = true;
+                downloadBtn.disabled = true;
+                loading.style.display = 'block';
+                resultArea.style.display = 'none';
+                hideMessages();
+
+                try {
+                    const response = await fetch('/api/convert', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        convertedContent = result.content;
+                        // Prefer client-side filename computed from selectedFile to avoid encoding issues
+                        const directionNow = document.querySelector('input[name="direction"]:checked').value;
+                        const rawBase = selectedFile.name.replace(/\.[^.]+$/, '');
+                        const safeBase = rawBase.replace(/[\\/:*?"<>|]/g, '_');
+                        const fmt = directionNow === 'xmind_to_md' ? (document.querySelector('input[name="format"]:checked')?.value || 'header') : null;
+                        if (directionNow === 'xmind_to_md') {
+                            convertedFilename = safeBase + (fmt === 'list' ? '_list.md' : '.md');
+                        } else if (directionNow === 'md_to_md') {
+                            convertedFilename = safeBase + '（转换版）.md';
+                        } else if (directionNow === 'md_to_xmind') {
+                            convertedFilename = safeBase + '.xmind';
+                        } else {
+                            // fallback to server-provided name if unknown
+                            convertedFilename = result.filename || (safeBase + '.txt');
+                        }
+                        // 展示策略：xmind_to_md 与 md_to_md 显示文本内容；md_to_xmind 不显示文本（仅下载）
+                        if (directionNow === 'xmind_to_md' || directionNow === 'md_to_md') {
+                            resultContent.textContent = result.content;
+                            resultArea.style.display = 'block';
+                        } else {
+                            resultContent.textContent = '';
+                            resultArea.style.display = 'block';
+                        }
+                        downloadBtn.disabled = false;
+                        showSuccess('转换成功！');
+                    } else {
+                        showError(result.error || '转换失败');
+                    }
+                } catch (error) {
+                    showError('网络错误，请重试');
+                } finally {
+                    loading.style.display = 'none';
+                    convertBtn.disabled = false;
+                }
+            }
+
+            async function handleDownload() {
+                // 若没有当前会话的转换结果，直接提示并返回，避免下载上一次缓存
+                if (!convertedFilename && !convertedContent) {
+                    showError('没有可下载的内容');
+                    return;
+                }
+                // 先尝试 GET 下载（使用服务端缓存的最近结果）
+                try {
+                    const response = await fetch('/api/download', { method: 'GET' });
+                    if (response.ok) {
+                        const blob = await response.blob();
+
+                        // 优先使用前端计算的文件名
+                        let downloadFilename = convertedFilename;
+                        if (!downloadFilename) {
+                            const cd = response.headers.get('Content-Disposition');
+                            if (cd) {
+                                const m1 = cd.match(/filename\*=UTF-8''([^;]+)/);
+                                if (m1) downloadFilename = decodeURIComponent(m1[1]);
+                                else {
+                                    const m2 = cd.match(/filename="([^"]+)"/);
+                                    if (m2) downloadFilename = m2[1];
+                                }
+                            }
+                        }
+                        downloadFilename = downloadFilename || 'download.txt';
+
+                        // 1) 优先使用 File System Access API，能稳定保持中文文件名
+                        if (window.showSaveFilePicker) {
+                            try {
+                                const directionNow = document.querySelector('input[name="direction"]:checked').value;
+                                const ext = directionNow === 'md_to_xmind' ? '.xmind' : '.md';
+                                const picker = await window.showSaveFilePicker({
+                                    suggestedName: downloadFilename,
+                                    types: [{
+                                        description: ext === '.xmind' ? 'XMind 文件' : 'Markdown 文件',
+                                        accept: ext === '.xmind' ? { 'application/octet-stream': ['.xmind'] } : { 'text/markdown': ['.md'] }
+                                    }]
+                                });
+                                const writable = await picker.createWritable();
+                                await writable.write(blob);
+                                await writable.close();
+                                showSuccess('文件已保存');
+                                return;
+                            } catch (pickerErr) {
+                                // 用户取消或不支持，回退到 a[download]
+                            }
+                        }
+
+                        // 2) 回退：a[download] 方式
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = downloadFilename;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        return;
+                    }
+                } catch (e) {
+                    // ignore and fallback
+                }
+
+                // 兼容兜底：旧的 POST 下载
+                try {
+                    if (!convertedFilename) {
+                        showError('没有可下载的内容');
+                        return;
+                    }
+                    const response = await fetch('/api/download', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            content: convertedContent,
+                            filename: convertedFilename,
+                            direction: document.querySelector('input[name="direction"]:checked').value
+                        })
+                    });
+
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        let downloadFilename = convertedFilename || 'download.txt';
+
+                        // 同样优先使用文件保存选择器
+                        if (window.showSaveFilePicker) {
+                            try {
+                                const directionNow = document.querySelector('input[name="direction"]:checked').value;
+                                const ext = directionNow === 'md_to_xmind' ? '.xmind' : '.md';
+                                const picker = await window.showSaveFilePicker({
+                                    suggestedName: downloadFilename,
+                                    types: [{
+                                        description: ext === '.xmind' ? 'XMind 文件' : 'Markdown 文件',
+                                        accept: ext === '.xmind' ? { 'application/octet-stream': ['.xmind'] } : { 'text/markdown': ['.md'] }
+                                    }]
+                                });
+                                const writable = await picker.createWritable();
+                                await writable.write(blob);
+                                await writable.close();
+                                showSuccess('文件已保存');
+                                return;
+                            } catch (pickerErr) {
+                                if (pickerErr && (pickerErr.name === 'AbortError' || pickerErr.name === 'NotAllowedError')) {
+                                    return;
+                                }
+                            }
+                        }
+
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = downloadFilename;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                    } else {
+                        showError('下载失败');
+                    }
+                } catch (error) {
+                    showError('下载失败');
+                }
+            }
+
+            function showError(message) {
+                hideMessages();
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = message;
+                convertForm.appendChild(errorDiv);
+            }
+
+            function showSuccess(message) {
+                hideMessages();
+                const successDiv = document.createElement('div');
+                successDiv.className = 'success';
+                successDiv.textContent = message;
+                convertForm.appendChild(successDiv);
+            }
+
+            function hideMessages() {
+                const messages = document.querySelectorAll('.error, .success');
+                messages.forEach(msg => msg.remove());
+            }
+
+            // 初始化界面
+            updateUIForDirection();
+        });
+    </script>
+</body>
+</html>

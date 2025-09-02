@@ -1,0 +1,55 @@
+{
+  "name": "xmindmd-app",
+  "version": "1.0.0",
+  "description": "XMind ⇄ Markdown 转换器 (本地桌面应用)",
+  "main": "main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build:mac": "electron-builder --mac dmg",
+    "build:win": "electron-builder --win nsis",
+    "build:all": "electron-builder --mac dmg --win nsis",
+    "dist": "npm run build:all"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "jszip": "^3.10.1",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.xmindmd.converter",
+    "productName": "XMind ⇄ Markdown 转换器",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg"
+      ]
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "index.html",
+      "main.js",
+      "server.js"
+    ],
+    "directories": {
+      "buildResources": "build"
+    }
+  }
+}

@@ -1,5 +1,18 @@
 name: Build and Release
 
+# 添加权限声明以解决 403 错误
+permissions:
+  contents: write
+  actions: read
+  checks: write
+  deployments: write
+  issues: write
+  packages: write
+  pull-requests: write
+  repository-projects: write
+  security-events: write
+  statuses: write
+
 on:
   push:
     tags:
@@ -65,6 +78,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    # 为 release job 添加明确的权限
+    permissions:
+      contents: write
+      actions: read
     
     steps:
       - name: Checkout code

@@ -25,11 +25,13 @@
   "build": {
     "appId": "com.xmindmd.converter",
     "productName": "XMind ⇄ Markdown 转换器",
+    "publish": null,
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
         "dmg"
-      ]
+      ],
+      "identity": null
     },
     "win": {
       "target": [
@@ -37,7 +39,9 @@
           "target": "nsis",
           "arch": ["x64"]
         }
-      ]
+      ],
+      "certificateFile": null,
+      "certificatePassword": null
     },
     "nsis": {
       "oneClick": false,
@@ -46,7 +50,9 @@
     "files": [
       "index.html",
       "main.js",
-      "server.js"
+      "server.js",
+      "*.py",
+      "themes.html"
     ],
     "directories": {
       "buildResources": "build"

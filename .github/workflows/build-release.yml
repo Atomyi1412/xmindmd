@@ -14,7 +14,9 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, windows-latest]
         include:
@@ -39,12 +41,16 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        timeout-minutes: 10
 
       - name: Build application
         run: ${{ matrix.build_command }}
+        timeout-minutes: 20
         env:
           ELECTRON_MIRROR: https://npmmirror.com/mirrors/electron/
           ELECTRON_BUILDER_CACHE: ~/.cache/electron-builder
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEBUG: electron-builder
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -83,12 +89,12 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
-          release_name: XMind ⇄ Markdown 转换器 ${{ steps.get_version.outputs.version }}
+          name: XMind ⇄ Markdown 转换器 ${{ steps.get_version.outputs.version }}
           body: |
             ## XMind ⇄ Markdown 转换器 ${{ steps.get_version.outputs.version }}
             
@@ -111,23 +117,6 @@ jobs:
             构建时间：${{ github.run_id }}
           draft: false
           prerelease: false
-
-      - name: Upload macOS Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/mac-build/XMind ⇄ Markdown 转换器-${{ steps.get_version.outputs.version }}-arm64.dmg
-          asset_name: XMind-Markdown-Converter-${{ steps.get_version.outputs.version }}-macOS.dmg
-          asset_content_type: application/octet-stream
-
-      - name: Upload Windows Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/win-build/XMind ⇄ Markdown 转换器 Setup ${{ steps.get_version.outputs.version }}.exe
-          asset_name: XMind-Markdown-Converter-${{ steps.get_version.outputs.version }}-Windows.exe
-          asset_content_type: application/octet-stream
+          files: |
+            ./artifacts/mac-build/*.dmg
+            ./artifacts/win-build/*.exe

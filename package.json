@@ -24,7 +24,7 @@
   },
   "build": {
     "appId": "com.xmindmd.converter",
-    "productName": "XMind ⇄ Markdown 转换器",
+    "productName": "XMind转换器",
     "artifactName": "xmindmd-${version}-${os}-${arch}.${ext}",
     "publish": null,
     "mac": {

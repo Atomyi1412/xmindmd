@@ -1,6 +1,6 @@
 {
   "name": "xmindmd-app",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "XMind ⇄ Markdown 转换器 (本地桌面应用)",
   "main": "main.js",
   "author": "",
@@ -9,8 +9,8 @@
     "start": "electron .",
     "dev": "electron .",
     "build:mac": "electron-builder --mac dmg",
-    "build:win": "electron-builder --win nsis",
-    "build:all": "electron-builder --mac dmg --win nsis",
+    "build:win": "electron-builder --win nsis portable zip",
+    "build:all": "electron-builder --mac dmg --win nsis portable zip",
     "dist": "npm run build:all"
   },
   "dependencies": {
@@ -37,6 +37,14 @@
       "target": [
         {
           "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        },
+        {
+          "target": "zip",
           "arch": ["x64"]
         }
       ],

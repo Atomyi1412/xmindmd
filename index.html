@@ -12,16 +12,16 @@
         }
 
         :root {
-            --bg: #f8fafc;
+            --bg: #f0fdf4;
             --bg-elev: #111827cc;
             --panel: #ffffff;
-            --panel-2: #f1f5f9;
-            --border: #e5e7eb;
-            --text: #0f172a;
-            --muted: #64748b;
-            --primary: #0ea5e9;
+            --panel-2: #ecfdf5;
+            --border: #d1fae5;
+            --text: #064e3b;
+            --muted: #0f766e;
+            --primary: #10b981;
             --primary-contrast: #ffffff;
-            --accent: #22c55e;
+            --accent: #14b8a6;
             --accent-contrast: #ffffff;
         }
 
@@ -306,7 +306,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔄 双向转换器 v1.0.0</h1>
+            <h1>🔄 双向转换器 v1.1.0</h1>
             <p>XMind ⇄ Markdown 互相转换</p>
         </div>
 
@@ -319,15 +319,20 @@
                         <div>🧠➡️📝</div>
                         <small>XMind → Markdown</small>
                     </label>
+                    <label class="format-option" for="directionMdToMd">
+                        <input type="radio" id="directionMdToMd" name="direction" value="md_to_md">
+                        <div>📝➡️📝</div>
+                        <small>Markdown → Markdown（增加二级）</small>
+                    </label>
                     <label class="format-option" for="directionMdToXmind">
                         <input type="radio" id="directionMdToXmind" name="direction" value="md_to_xmind">
                         <div>📝➡️🧠</div>
                         <small>Markdown → XMind</small>
                     </label>
-                    <label class="format-option" for="directionMdToMd">
-                        <input type="radio" id="directionMdToMd" name="direction" value="md_to_md">
-                        <div>📝➡️📝</div>
-                        <small>Markdown → Markdown（增加二级）</small>
+                    <label class="format-option" for="directionOneClick">
+                        <input type="radio" id="directionOneClick" name="direction" value="one_click_optimize">
+                        <div>🧠✨🧠</div>
+                        <small>一键优化 XMind</small>
                     </label>
                 </div>
             </div>
@@ -365,7 +370,7 @@
 
             <div class="loading" id="loading">
                 <div class="loading-spinner"></div>
-                <p>正在转换中，请稍候...</p>
+                <p id="loadingText">正在转换中，请稍候...</p>
             </div>
 
             <div class="result-area" id="resultArea">
@@ -481,11 +486,16 @@
                     uploadHint.textContent = '支持 .xmind 格式，最大 16MB';
                     fileInput.accept = '.xmind';
                     formatSelection.style.display = 'block';
+                } else if (direction === 'one_click_optimize') {
+                    uploadText.textContent = '点击选择或拖拽 XMind 文件';
+                    uploadHint.textContent = '支持 .xmind 格式，最大 16MB';
+                    fileInput.accept = '.xmind';
+                    formatSelection.style.display = 'none';
                 } else {
                     uploadText.textContent = '点击选择或拖拽 Markdown 文件';
                     uploadHint.textContent = '支持 .md 格式，最大 16MB';
                     fileInput.accept = '.md';
-                    formatSelection.style.display = (direction === 'xmind_to_md') ? 'block' : 'none';
+                    formatSelection.style.display = 'none';
                 }
                 // 清理选择状态
                 selectedFile = null;
@@ -504,7 +514,7 @@
             function handleFile(file) {
                 const direction = document.querySelector('input[name="direction"]:checked').value;
                 
-                if (direction === 'xmind_to_md') {
+                if (direction === 'xmind_to_md' || direction === 'one_click_optimize') {
                     if (!file.name.toLowerCase().endsWith('.xmind')) {
                         showError('请选择 .xmind 格式的文件');
                         return;
@@ -559,6 +569,14 @@
                 loading.style.display = 'block';
                 resultArea.style.display = 'none';
                 hideMessages();
+                
+                // 为一键优化功能设置特殊的加载提示
+                const loadingText = document.getElementById('loadingText');
+                if (direction === 'one_click_optimize') {
+                    loadingText.textContent = '正在执行一键优化：XMind → MD → MD（增加二级）→ XMind...';
+                } else {
+                    loadingText.textContent = '正在转换中，请稍候...';
+                }
 
                 try {
                     const response = await fetch('/api/convert', {
@@ -581,11 +599,13 @@
                             convertedFilename = safeBase + '（转换版）.md';
                         } else if (directionNow === 'md_to_xmind') {
                             convertedFilename = safeBase + '.xmind';
+                        } else if (directionNow === 'one_click_optimize') {
+                            convertedFilename = safeBase + '（优化版）.xmind';
                         } else {
                             // fallback to server-provided name if unknown
                             convertedFilename = result.filename || (safeBase + '.txt');
                         }
-                        // 展示策略：xmind_to_md 与 md_to_md 显示文本内容；md_to_xmind 不显示文本（仅下载）
+                        // 展示策略：xmind_to_md 与 md_to_md 显示文本内容；md_to_xmind 与 one_click_optimize 不显示文本（仅下载）
                         if (directionNow === 'xmind_to_md' || directionNow === 'md_to_md') {
                             resultContent.textContent = result.content;
                             resultArea.style.display = 'block';
@@ -637,7 +657,7 @@
                         if (window.showSaveFilePicker) {
                             try {
                                 const directionNow = document.querySelector('input[name="direction"]:checked').value;
-                                const ext = directionNow === 'md_to_xmind' ? '.xmind' : '.md';
+                                const ext = (directionNow === 'md_to_xmind' || directionNow === 'one_click_optimize') ? '.xmind' : '.md';
                                 const picker = await window.showSaveFilePicker({
                                     suggestedName: downloadFilename,
                                     types: [{
@@ -694,7 +714,7 @@
                         if (window.showSaveFilePicker) {
                             try {
                                 const directionNow = document.querySelector('input[name="direction"]:checked').value;
-                                const ext = directionNow === 'md_to_xmind' ? '.xmind' : '.md';
+                                const ext = (directionNow === 'md_to_xmind' || directionNow === 'one_click_optimize') ? '.xmind' : '.md';
                                 const picker = await window.showSaveFilePicker({
                                     suggestedName: downloadFilename,
                                     types: [{

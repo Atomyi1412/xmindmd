@@ -7,12 +7,22 @@ let mainWindow = null;
 let serverInfo = null;
 
 function createWindow(port) {
+  // 获取屏幕尺寸
+  const { screen } = require('electron');
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
+  
+  // 计算窗口尺寸（屏幕的80%，但不小于最小尺寸）
+  const windowWidth = Math.max(1200, Math.floor(screenWidth * 0.8));
+  const windowHeight = Math.max(900, Math.floor(screenHeight * 0.8));
+  
   mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 800,
-    minWidth: 900,
-    minHeight: 700,
-    title: 'XMind ⇄ Markdown 转换器 v1.0.0',
+    width: windowWidth,
+    height: windowHeight,
+    minWidth: 1000,
+    minHeight: 800,
+    center: true, // 窗口居中显示
+    title: 'XMind ⇄ Markdown 转换器 v1.1.0',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

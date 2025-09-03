@@ -310,7 +310,9 @@ function createApp() {
 
   app.post('/api/convert', upload.single('file'), async (req, res) => {
     try {
-      const direction = (req.body.direction || '').trim();
+      // Normalize direction to a safe, comparable lower-case string
+      const directionRaw = req.body && typeof req.body.direction !== 'undefined' ? req.body.direction : '';
+      const direction = (Array.isArray(directionRaw) ? directionRaw[0] : String(directionRaw || '')).toLowerCase().trim();
       const format = (req.body.format || 'header').trim();
       if (!req.file) return res.json({ success: false, error: '未收到文件' });
       const originalNameRaw = req.file.originalname || 'file';
@@ -348,7 +350,33 @@ function createApp() {
         return res.json({ success: true, filename });
       }
 
-      return res.json({ success: false, error: '未知的转换方向' });
+      // Accept several aliases for one-click optimize to be resilient
+      if (['one_click_optimize', 'one-click-optimize', 'one_click', 'oneclick', 'optimize_xmind'].includes(direction)) {
+        // 一键优化：XMind → MD → MD（增加二级）→ XMind
+        try {
+          // 步骤1：XMind → MD
+          const md = await xmindZipToMarkdown(req.file.buffer, 'header');
+          
+          // 步骤2：MD → MD（增加二级）
+          const optimizedMd = convertMdToMd(md);
+          
+          // 步骤3：MD → XMind
+          const struct = parseMarkdownToStructure(optimizedMd);
+          const buffer = await buildXMindZipFromStructure(struct);
+          
+          lastBinary = buffer;
+          const filename = base + '（优化版）.xmind';
+          lastFilename = filename;
+          // 清空文本缓存
+          lastTextBuffer = null;
+          return res.json({ success: true, filename });
+        } catch (error) {
+          console.error('一键优化转换失败:', error);
+          return res.json({ success: false, error: '一键优化转换失败: ' + (error && error.message ? error.message : String(error)) });
+        }
+      }
+
+      return res.json({ success: false, error: '未知的转换方向: ' + direction });
     } catch (e) {
       console.error(e);
       return res.json({ success: false, error: e.message || '转换失败' });

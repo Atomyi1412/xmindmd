@@ -22,7 +22,7 @@ function createWindow(port) {
     minWidth: 800,
     minHeight: 600,
     center: true, // 窗口居中显示
-    title: 'XMind ⇄ Markdown 转换器 v1.1.0',
+    title: 'XMind 转换',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

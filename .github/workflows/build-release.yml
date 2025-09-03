@@ -70,10 +70,10 @@ jobs:
         with:
           name: ${{ matrix.platform }}-build
           path: |
-            dist/${{ matrix.artifact_name }}
+            dist/xmindmd-*.dmg
+            dist/xmindmd-*.exe
+            dist/xmindmd-*.zip
             dist/*.blockmap
-            dist/*.exe
-            dist/*-win.zip
           retention-days: 30
 
   release:
@@ -137,6 +137,5 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            ./artifacts/mac-build/*.dmg
-            ./artifacts/win-build/*.exe
-            ./artifacts/win-build/*-win.zip
+            ./artifacts/mac-build/*
+            ./artifacts/win-build/*

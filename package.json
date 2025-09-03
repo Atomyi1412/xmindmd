@@ -1,6 +1,6 @@
 {
   "name": "xmindmd-app",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "XMind ⇄ Markdown 转换器 (本地桌面应用)",
   "main": "main.js",
   "author": "",
@@ -25,7 +25,7 @@
   "build": {
     "appId": "com.xmindmd.converter",
     "productName": "XMind ⇄ Markdown 转换器",
-    "artifactName": "xmindmd-${version}-${os}-${arch}-${target}.${ext}",
+    "artifactName": "xmindmd-${version}-${os}-${arch}.${ext}",
     "publish": null,
     "mac": {
       "category": "public.app-category.productivity",
@@ -54,7 +54,11 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "xmindmd-${version}-${os}-${arch}-nsis.${ext}"
+    },
+    "portable": {
+      "artifactName": "xmindmd-${version}-${os}-${arch}-portable.${ext}"
     },
     "files": [
       "index.html",

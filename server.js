@@ -353,6 +353,8 @@ function createApp() {
         lastTextBuffer = Buffer.from(md, 'utf8');
         lastContentType = 'text/markdown; charset=utf-8';
         lastFilename = filename;
+        // 清空二进制缓存，确保下载文本内容
+        lastBinary = null;
         return res.json({ success: true, content: md, filename });
       }
 
@@ -374,6 +376,8 @@ function createApp() {
         lastTextBuffer = Buffer.from(converted, 'utf8');
         lastContentType = 'text/markdown; charset=utf-8';
         lastFilename = filename;
+        // 清空二进制缓存，确保下载文本内容
+        lastBinary = null;
         return res.json({ success: true, content: converted, filename });
       }
 
@@ -384,7 +388,7 @@ function createApp() {
         lastBinary = buffer;
         const filename = base + '.xmind';
         lastFilename = filename;
-        // 清空文本缓存
+        // 清空文本缓存，确保下载二进制内容
         lastTextBuffer = null;
         return res.json({ success: true, filename });
       }

@@ -78,14 +78,14 @@
 
         .format-options {
             display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
+            gap: 10px;
+            flex-wrap: nowrap;
         }
 
         .format-option {
             flex: 1;
-            min-width: 200px;
-            padding: 20px;
+            min-width: 0;
+            padding: 15px 10px;
             border: 2px solid var(--border);
             border-radius: 12px;
             cursor: pointer;
@@ -116,8 +116,82 @@
         }
 
         .format-option small {
-            font-size: 0.9em;
+            font-size: 0.8em;
             opacity: 0.8;
+            line-height: 1.2;
+        }
+
+        .format-inline-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .format-title {
+            font-size: 1em;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .format-radio-options {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .format-radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            color: var(--text);
+            transition: all 0.2s ease;
+        }
+
+        .format-radio-option:hover {
+            color: var(--primary);
+        }
+
+        .format-radio-option input[type="radio"] {
+            display: none;
+        }
+
+        .radio-dot {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .radio-dot::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.2s ease;
+        }
+
+        .format-radio-option input[type="radio"]:checked + .radio-dot {
+            border-color: var(--primary);
+        }
+
+        .format-radio-option input[type="radio"]:checked + .radio-dot::after {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .radio-label {
+            user-select: none;
         }
 
         .upload-area {
@@ -179,6 +253,172 @@
         .file-info p {
             color: var(--muted);
             font-size: 0.9em;
+        }
+
+        .file-name-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0;
+        }
+
+        .file-name-row p {
+            margin: 0;
+            flex: 1;
+        }
+
+        .reselect-btn {
+            background: var(--border);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-left: 10px;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .reselect-btn:hover {
+            background: var(--muted);
+            color: var(--primary-contrast);
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: var(--panel);
+            margin: 10% auto;
+            padding: 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--text);
+        }
+
+        .close {
+            color: var(--muted);
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: var(--text);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-body p {
+            margin: 0 0 15px 0;
+            color: var(--text);
+            font-size: 16px;
+        }
+
+        .modal-preview {
+            margin-top: 20px;
+        }
+
+        .modal-preview h4 {
+            margin: 0 0 10px 0;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .preview-content {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            color: var(--text);
+            white-space: pre-wrap;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn.download-btn {
+            background: var(--primary);
+            color: var(--primary-contrast);
+        }
+
+        .modal-btn.download-btn:hover {
+            background: var(--accent);
+        }
+
+        .modal-btn.preview-btn {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .modal-btn.preview-btn:hover {
+            background: var(--muted);
+            color: var(--primary-contrast);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .convert-btn {
@@ -306,8 +546,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔄 双向转换器 v1.1.1</h1>
-            <p>XMind ⇄ Markdown 互相转换</p>
+            <h1>🔄 XMind 转换 v1.2.0</h1>
         </div>
 
         <form id="convertForm" enctype="multipart/form-data" class="form-container">
@@ -322,7 +561,7 @@
                     <label class="format-option" for="directionMdToMd">
                         <input type="radio" id="directionMdToMd" name="direction" value="md_to_md">
                         <div>📝➡️📝</div>
-                        <small>Markdown → Markdown（增加二级）</small>
+                        <small>Markdown → Markdown（增加二级，需要标题格式）</small>
                     </label>
                     <label class="format-option" for="directionMdToXmind">
                         <input type="radio" id="directionMdToXmind" name="direction" value="md_to_xmind">
@@ -332,24 +571,26 @@
                     <label class="format-option" for="directionOneClick">
                         <input type="radio" id="directionOneClick" name="direction" value="one_click_optimize">
                         <div>🧠✨🧠</div>
-                        <small>一键优化 XMind</small>
+                        <small>一键转换 XMind（增加二级）</small>
                     </label>
                 </div>
             </div>
 
             <div class="conversion-direction" id="formatSelection">
-                <div class="format-title">选择输出格式</div>
-                <div class="format-options">
-                    <label class="format-option selected" for="formatHeader">
-                        <input type="radio" id="formatHeader" name="format" value="header" checked>
-                        <div>📋</div>
-                        <small>标题格式</small>
-                    </label>
-                    <label class="format-option" for="formatList">
-                        <input type="radio" id="formatList" name="format" value="list">
-                        <div>📝</div>
-                        <small>列表格式</small>
-                    </label>
+                <div class="format-inline-container">
+                    <div class="format-title">选择输出格式</div>
+                    <div class="format-radio-options">
+                        <label class="format-radio-option" for="formatHeader">
+                            <input type="radio" id="formatHeader" name="format" value="header" checked>
+                            <span class="radio-dot"></span>
+                            <span class="radio-label">标题格式</span>
+                        </label>
+                        <label class="format-radio-option" for="formatList">
+                            <input type="radio" id="formatList" name="format" value="list">
+                            <span class="radio-dot"></span>
+                            <span class="radio-label">列表格式</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -362,7 +603,10 @@
 
             <div class="file-info" id="fileInfo">
                 <h4>已选择文件</h4>
-                <p id="fileName"></p>
+                <div class="file-name-row">
+                    <p id="fileName"></p>
+                    <button type="button" class="reselect-btn" id="reselectBtn">重新选择文件</button>
+                </div>
                 <p id="fileSize"></p>
             </div>
 
@@ -378,6 +622,27 @@
                 <button type="button" class="download-btn" id="downloadBtn">下载结果</button>
             </div>
         </form>
+    </div>
+
+    <!-- 转换结果模态框 -->
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>转换结果</h3>
+                <span class="close" id="closeModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="modalResultText">转换成功！</p>
+                <div class="modal-preview" id="modalPreview" style="display: none;">
+                    <h4>预览内容：</h4>
+                    <div class="preview-content" id="previewContent"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn download-btn" id="modalDownloadBtn">下载结果</button>
+                <button type="button" class="modal-btn preview-btn" id="modalPreviewBtn" style="display: none;">预览结果</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -397,13 +662,23 @@
             const resultContent = document.getElementById('resultContent');
             const downloadBtn = document.getElementById('downloadBtn');
             const formatSelection = document.getElementById('formatSelection');
+            const reselectBtn = document.getElementById('reselectBtn');
+            
+            // 获取模态框元素
+            const resultModal = document.getElementById('resultModal');
+            const closeModal = document.getElementById('closeModal');
+            const modalResultText = document.getElementById('modalResultText');
+            const modalPreview = document.getElementById('modalPreview');
+            const previewContent = document.getElementById('previewContent');
+            const modalDownloadBtn = document.getElementById('modalDownloadBtn');
+            const modalPreviewBtn = document.getElementById('modalPreviewBtn');
             
             // 获取所有方向选项
             const directionOptions = document.querySelectorAll('input[name="direction"]');
             const directionLabels = document.querySelectorAll('label[for^="direction"]');
             
             // 获取所有格式选项
-            const formatOptions = document.querySelectorAll('label[for^="format"]');
+            const formatOptions = document.querySelectorAll('.format-radio-option');
             
             let selectedFile = null;
             let convertedContent = null;
@@ -456,11 +731,9 @@
                 });
             });
             
-            // 格式选择事件
+            // 格式选择事件 - 更新为圆点选项
             formatOptions.forEach(option => {
                 option.addEventListener('click', () => {
-                    formatOptions.forEach(opt => opt.classList.remove('selected'));
-                    option.classList.add('selected');
                     const input = option.querySelector('input[name="format"]');
                     if (input) input.checked = true;
                 });
@@ -471,6 +744,49 @@
 
             // 下载按钮事件
             downloadBtn.addEventListener('click', handleDownload);
+
+            // 重新选择文件按钮事件
+            reselectBtn.addEventListener('click', () => {
+                uploadArea.style.display = 'block';
+                fileInfo.style.display = 'none';
+                selectedFile = null;
+                fileInput.value = '';
+                convertBtn.disabled = true;
+                fileInput.click();
+            });
+
+            // 模态框事件监听器
+            closeModal.addEventListener('click', () => {
+                resultModal.style.display = 'none';
+            });
+
+            // 点击模态框背景关闭
+            resultModal.addEventListener('click', (e) => {
+                if (e.target === resultModal) {
+                    resultModal.style.display = 'none';
+                }
+            });
+
+            // 模态框下载按钮事件
+            modalDownloadBtn.addEventListener('click', handleDownload);
+
+            // 模态框预览按钮事件
+            modalPreviewBtn.addEventListener('click', () => {
+                if (modalPreview.style.display === 'none') {
+                    modalPreview.style.display = 'block';
+                    modalPreviewBtn.textContent = '隐藏预览';
+                } else {
+                    modalPreview.style.display = 'none';
+                    modalPreviewBtn.textContent = '预览结果';
+                }
+            });
+
+            // ESC键关闭模态框
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && resultModal.style.display === 'block') {
+                    resultModal.style.display = 'none';
+                }
+            });
 
             function handleFileSelect(e) {
                 const file = e.target.files[0];
@@ -501,6 +817,7 @@
                 selectedFile = null;
                 fileInput.value = '';
                 fileInfo.style.display = 'none';
+                uploadArea.style.display = 'block';
                 convertBtn.disabled = true;
                 // 清理转换结果与下载状态
                 convertedContent = null;
@@ -535,6 +852,7 @@
                 fileName.textContent = file.name;
                 fileSize.textContent = formatFileSize(file.size);
                 fileInfo.style.display = 'block';
+                uploadArea.style.display = 'none';
                 convertBtn.disabled = false;
                 hideMessages();
             }
@@ -605,18 +923,9 @@
                             // fallback to server-provided name if unknown
                             convertedFilename = result.filename || (safeBase + '.txt');
                         }
-                        // 展示策略：xmind_to_md 与 md_to_md 显示文本内容；md_to_xmind 与 one_click_optimize 不显示文本（仅下载）
-                        if (directionNow === 'xmind_to_md' || directionNow === 'md_to_md') {
-                            // 安全地显示内容，避免XSS攻击
-                            const safeContent = result.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                            resultContent.innerHTML = safeContent.replace(/\n/g, '<br>');
-                            resultArea.style.display = 'block';
-                        } else {
-                            resultContent.innerHTML = '';
-                            resultArea.style.display = 'block';
-                        }
+                        // 显示转换结果模态框
+                        showResultModal(directionNow, result.content);
                         downloadBtn.disabled = false;
-                        showSuccess('转换成功！');
                     } else {
                         showError(result.error || '转换失败');
                     }
@@ -771,6 +1080,34 @@
             function hideMessages() {
                 const messages = document.querySelectorAll('.error, .success');
                 messages.forEach(msg => msg.remove());
+            }
+
+            function showResultModal(direction, content) {
+                // 设置模态框标题和结果文本
+                modalResultText.textContent = '转换成功！';
+                
+                // 判断是否为markdown格式，决定是否显示预览按钮
+                const isMarkdown = direction === 'xmind_to_md' || direction === 'md_to_md';
+                
+                if (isMarkdown) {
+                    // 显示预览按钮
+                    modalPreviewBtn.style.display = 'inline-block';
+                    modalPreviewBtn.textContent = '预览结果';
+                    
+                    // 设置预览内容
+                    const safeContent = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    previewContent.textContent = content;
+                    
+                    // 初始隐藏预览区域
+                    modalPreview.style.display = 'none';
+                } else {
+                    // 隐藏预览按钮
+                    modalPreviewBtn.style.display = 'none';
+                    modalPreview.style.display = 'none';
+                }
+                
+                // 显示模态框
+                resultModal.style.display = 'block';
             }
 
             // 初始化界面

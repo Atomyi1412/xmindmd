@@ -1,4 +1,4 @@
-# XMind ⇄ Markdown 转换器 v1.1.1
+# XMind ⇄ Markdown 转换器 v1.2.0
 
 一个基于 Electron 的桌面应用，支持 XMind 思维导图与 Markdown 文档之间的双向转换。
 

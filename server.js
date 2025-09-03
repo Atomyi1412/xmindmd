@@ -136,6 +136,8 @@ function parseMarkdownToStructure(content) {
   const lines = content.split('\n');
   const structure = { title: 'Markdown 思维导图', children: [] };
   const pathStack = [structure];
+  let firstH1Found = false;
+  
   for (let raw of lines) {
     const line = raw.replace(/\r$/, '').trimEnd();
     if (!line.trim()) continue;
@@ -144,12 +146,34 @@ function parseMarkdownToStructure(content) {
     if (h) {
       const level = h[1].length;
       const title = h[2].trim();
+      
+      // 如果是第一个一级标题，直接设为根节点标题，不添加到 children
+      if (level === 1 && !firstH1Found) {
+        structure.title = title;
+        firstH1Found = true;
+        // 重置路径栈，准备处理后续内容
+        pathStack.length = 1; // 保持只有 structure
+        continue;
+      }
+      
       const node = { title, children: [] };
-      while (pathStack.length > level) pathStack.pop();
+      // 所有标题都需要上移一级：一级变根节点，二级变一级，三级变二级，以此类推
+      let adjustedLevel;
+      if (level === 1) {
+        // 后续的一级标题作为一级分支
+        adjustedLevel = 1;
+      } else {
+        // 其他级别标题上移一级
+        adjustedLevel = level - 1;
+      }
+      
+      // 确保 adjustedLevel 至少为 1（作为根节点的直接子节点）
+      if (adjustedLevel < 1) adjustedLevel = 1;
+      
+      while (pathStack.length > adjustedLevel) pathStack.pop();
       if (pathStack.length === 0) pathStack.push(structure);
       (pathStack[pathStack.length - 1].children).push(node);
       pathStack.push(node);
-      if (level === 1 && structure.children.length === 1) structure.title = title;
       continue;
     }
 
@@ -159,7 +183,11 @@ function parseMarkdownToStructure(content) {
       const title = lm[3].trim();
       const level = Math.floor(indent / 2) + 1; // two spaces per level
       const node = { title, children: [] };
-      while (pathStack.length > level + 1) pathStack.pop();
+      
+      // 如果已经找到第一个一级标题，列表项层级不需要额外调整
+      const adjustedLevel = level;
+      
+      while (pathStack.length > adjustedLevel) pathStack.pop();
       if (pathStack.length === 0) pathStack.push(structure);
       (pathStack[pathStack.length - 1].children).push(node);
       pathStack.push(node);
@@ -329,8 +357,19 @@ function createApp() {
       }
 
       if (direction === 'md_to_md') {
+        console.log('Processing md_to_md conversion');
+        console.log('File buffer length:', req.file.buffer.length);
+        console.log('File mimetype:', req.file.mimetype);
+        console.log('Original filename:', originalName);
+        
         const text = req.file.buffer.toString('utf-8');
+        console.log('Decoded text length:', text.length);
+        console.log('First 100 chars:', text.substring(0, 100));
+        
         const converted = convertMdToMd(text);
+        console.log('Converted text length:', converted.length);
+        console.log('Converted first 100 chars:', converted.substring(0, 100));
+        
         const filename = base + '（转换版）.md';
         lastTextBuffer = Buffer.from(converted, 'utf8');
         lastContentType = 'text/markdown; charset=utf-8';

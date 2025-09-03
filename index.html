@@ -306,7 +306,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔄 双向转换器 v1.1.0</h1>
+            <h1>🔄 双向转换器 v1.1.1</h1>
             <p>XMind ⇄ Markdown 互相转换</p>
         </div>
 
@@ -607,10 +607,12 @@
                         }
                         // 展示策略：xmind_to_md 与 md_to_md 显示文本内容；md_to_xmind 与 one_click_optimize 不显示文本（仅下载）
                         if (directionNow === 'xmind_to_md' || directionNow === 'md_to_md') {
-                            resultContent.textContent = result.content;
+                            // 安全地显示内容，避免XSS攻击
+                            const safeContent = result.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                            resultContent.innerHTML = safeContent.replace(/\n/g, '<br>');
                             resultArea.style.display = 'block';
                         } else {
-                            resultContent.textContent = '';
+                            resultContent.innerHTML = '';
                             resultArea.style.display = 'block';
                         }
                         downloadBtn.disabled = false;

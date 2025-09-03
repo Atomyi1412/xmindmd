@@ -31,16 +31,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest]
-        include:
-          - os: macos-latest
-            platform: mac
-            artifact_name: 'XMind ⇄ Markdown 转换器-*.dmg'
-            build_command: 'npm run build:mac'
-          - os: windows-latest
-            platform: win
-            artifact_name: 'XMind ⇄ Markdown 转换器 Setup *.exe'
-            build_command: 'npm run build:win'
+-        os: [macos-latest, windows-latest]
++        os: [macos-latest, macos-13, windows-latest]
+         include:
+           - os: macos-latest
+             platform: mac
+-            artifact_name: 'XMind ⇄ Markdown 转换器-*.dmg'
+-            build_command: 'npm run build:mac'
++            arch: arm64
++            artifact_name: 'xmindmd-*-mac-arm64.dmg'
++            build_command: 'electron-builder --mac dmg --arm64'
++          - os: macos-13
++            platform: mac-x64
++            arch: x64
++            artifact_name: 'xmindmd-*-mac-x64.dmg'
++            build_command: 'electron-builder --mac dmg --x64'
+           - os: windows-latest
+             platform: win
+             artifact_name: 'XMind ⇄ Markdown 转换器 Setup *.exe'
+             build_command: 'npm run build:win'
 
     steps:
       - name: Checkout code

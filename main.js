@@ -12,15 +12,15 @@ function createWindow(port) {
   const primaryDisplay = screen.getPrimaryDisplay();
   const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
   
-  // 计算窗口尺寸（屏幕的80%，但不小于最小尺寸）
-  const windowWidth = Math.max(1200, Math.floor(screenWidth * 0.8));
-  const windowHeight = Math.max(900, Math.floor(screenHeight * 0.8));
+  // 计算窗口尺寸（适合功能显示区域的尺寸）
+  const windowWidth = 900;
+  const windowHeight = 900;
   
   mainWindow = new BrowserWindow({
     width: windowWidth,
     height: windowHeight,
-    minWidth: 1000,
-    minHeight: 800,
+    minWidth: 800,
+    minHeight: 600,
     center: true, // 窗口居中显示
     title: 'XMind ⇄ Markdown 转换器 v1.1.0',
     webPreferences: {

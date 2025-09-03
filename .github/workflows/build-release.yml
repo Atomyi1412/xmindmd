@@ -72,10 +72,8 @@ jobs:
           path: |
             dist/${{ matrix.artifact_name }}
             dist/*.blockmap
-            dist/*-portable.exe
-            dist/*Portable.exe
+            dist/*.exe
             dist/*-win.zip
-            dist/*.zip
           retention-days: 30
 
   release:
@@ -141,7 +139,4 @@ jobs:
           files: |
             ./artifacts/mac-build/*.dmg
             ./artifacts/win-build/*.exe
-            ./artifacts/win-build/*-portable.exe
-            ./artifacts/win-build/*Portable.exe
             ./artifacts/win-build/*-win.zip
-            ./artifacts/win-build/*.zip
